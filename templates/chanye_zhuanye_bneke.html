@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>关系图案例</title>
+		<!-- 引入 ECharts 文件 -->
+    <script type="text/javascript" src="{{ url_for('static', filename='static/echarts.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='static/jquery-3.2.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='static/dataTool.js') }}"></script>
+	</head>
+	<body>
+		<!-- 为 ECharts 准备一个具备大小（宽高）的 容器 -->
+		<div id="main" style="width:100%; height:100%;position:absolute;"></div>
+	</body>
+</html>
+<script type="text/javascript">
+	// 基于准备好的容器(这里的容器是id为chart1的div)，初始化echarts实例
+	var myChart = echarts.init(document.getElementById('main'));
+	myChart.showLoading();
+    $.get("{{ url_for('static', filename='data/chanye_zhuanye_bneke.gexf') }}", function (xml) {
+
+        myChart.hideLoading();
+
+        var graph = echarts.dataTool.gexf.parse(xml);
+
+        var chanye = ['城镇化建设', '大数据', '电子信息', '光电信息', '建材', '建筑业',
+			'节能环保', '金融服务业', '旅游业', '民营经济', '农产品加工', '人工智能',
+			'社会治理能力现代化', '生物产业', '生物医药', '石化', '卫星遥感', '文化产业',
+			'现代服务业', '现代农业', '新材料', '新能源', '医药健康', '装备制造',
+			'汽车', '新能源汽车', '商贸流通业', '电子商务', '云计算', '物流业']
+
+        var categories = [];
+        for (var i = 0; i < 60; i++) {
+            categories[i] = {
+                name: chanye[i]
+            };
+        }
+        graph.nodes.forEach(function (node) {
+            node.itemStyle = null;
+            node.value = node.symbolSize;
+
+            node.symbolSize /= 1.5;
+            node.label = {
+                normal: {
+                    show: node.symbolSize > 10
+                }
+            };
+            node.category = node.attributes.modularity_class;
+
+        });
+        option = {
+            title: {
+                text: 'ccut',
+                subtext: 'Default layout',
+                top: 'bottom',
+                left: 'right'
+            },
+            tooltip: {},
+            legend: [{
+                // selectedMode: 'single',
+                data: categories.map(function (a) {
+                    return a.name;
+                })
+            }],
+            animationDuration: 1500,
+            animationEasingUpdate: 'quinticInOut',
+            series : [
+                {
+                    name: 'ccut',
+                    type: 'graph',
+                    layout: 'none',
+                    data: graph.nodes,
+                    links: graph.links,
+                    categories: categories,
+                    roam: true,
+                    focusNodeAdjacency: true,
+                    itemStyle: {
+                        normal: {
+                            borderColor: '#fff',
+                            borderWidth: 1,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(0, 0, 0, 0.3)'
+                        }
+                    },
+                    label: {
+                        position: 'right',
+                        formatter: '{b}'
+                    },
+                    lineStyle: {
+                        color: 'source',
+                        curveness: 0.3
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 10
+                        }
+                    }
+                }
+            ]
+
+        };
+
+        myChart.setOption(option);
+    }, 'xml');
+
+</script>
