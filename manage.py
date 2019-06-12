@@ -6,7 +6,9 @@ app = Flask(__name__,static_folder='', static_url_path='')
 
 
 
-
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/chanye_zhuanye_bneke')
@@ -19,7 +21,7 @@ def school_chanye():
 
 
 @app.route('/school_xuke')
-def school_chanye():
+def school_xuke():
     return render_template('school_xuke.html')
 
 
